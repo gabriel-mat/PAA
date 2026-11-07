@@ -1,3 +1,10 @@
+"""
+Gabriel Mateus Souza - RA 832254
+Letícia Ramos Fernandes - RA 834748
+Otávio Inácio de Oliveira - RA 831718
+"""
+import sys
+
 class Edificio:
     def __init__(self, e, h, d):
         self.e, self.h, self.d = e, h, d
@@ -10,7 +17,7 @@ class Silhueta:
         self.pares.append((a, b))
 
     def qtd(self):
-        return len(pares)
+        return len(self.pares)
 
 
 def cmpReta(a, b):
@@ -29,7 +36,7 @@ def cmpReta(a, b):
 # skyline(edificios): recebe uma lista de triplas e devolve a lista de pares da silhueta, usando Divisão e Conquista.
 def skyline(edificios):
     if len(edificios) == 0:
-        return NULL
+        return None
 
     if len(edificios) == 1:
         return silhuetaEdificio(edificios[0])
@@ -55,7 +62,7 @@ def unirSilhuetas(s1, s2):
     if cmp == -1:
         atual = s1.pares[0]
         i += 1
-    else if cmp == 1:
+    elif cmp == 1:
         atual = s2.pares[0]
         j += 1
     else:
@@ -76,7 +83,7 @@ def unirSilhuetas(s1, s2):
             atual = s1.pares[i][0]
             i += 1
             s3.add(atual)
-        else if j < s2.qtd():
+        elif j < s2.qtd():
             atual = s2.pares[j][0]
             j += 1
             s3.add(atual)
@@ -94,9 +101,77 @@ def silhuetaEdificio(ed):
 
     return s
 
-if __name__ == '__main__':
-    ed = Edificio(1, 2, 3)
-    s1 = silhuetaEdificio(ed)
+def gerarSVG(silhueta, arquivo_imagem):
+    # dimensão total da tela (canvas SVG)
+    largura_canvas = 800
+    altura_canvas = 450
+    
+    margem_borda = 50
+    margem_inferior = 50
+    
+    # posição Y da linha de base (chão)
+    y_base = altura_canvas - margem_inferior
 
-        print(i[0], i[1])
-        print(i[0], i[1])
+    # linha de base centralizada
+    x1_base = margem_borda
+    x2_base = largura_canvas - margem_borda
+
+    conteudo_svg = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{largura_canvas}" height="{altura_canvas}">',
+        f'<rect width="100%" height="100%" fill="white" />',
+    ]
+
+    # constrói os pontos do polígono
+    if len(silhueta) > 0:
+        pontos = []
+        pontos.insert(0, (silhueta[0][0], y_base))
+
+        for i, ponto in enumerate(silhueta):
+            x = ponto[0]
+            h = ponto[1]
+            y = y_base - h
+
+            if i > 0:
+                h_anterior = silhueta[i - 1][1] # altura do ponto anterior
+                # adiciona a quina horizontal
+                pontos.append((x, y_base - h_anterior))
+
+            pontos.append((x, y))
+
+        pontos_svg = " ".join(f"{x},{y}" for x, y in pontos)
+        conteudo_svg.extend([
+            f'<polygon points="{pontos_svg}" fill="peachpuff" stroke="none" />',
+            f'<polyline points="{pontos_svg}" fill="none" stroke="black" stroke-width="3" />'
+        ])
+
+    conteudo_svg.extend([
+        f'<line x1="{x1_base}" y1="{y_base}" x2="{x2_base}" y2="{y_base}" stroke="black" stroke-width="1" />',
+        '</svg>'
+    ])
+
+    with open(arquivo_imagem, 'w', encoding='utf-8') as f:
+        f.write('\n'.join(conteudo_svg))
+
+    return f
+
+if __name__ == "__main__":
+    """
+    python skyline.py entrada.txt saida.txt
+    python skyline.py entrada.txt saida.txt imagem.svg
+    """
+    
+    arquivo_entrada = sys.argv[1]
+    arquivo_saida = sys.argv[2]
+    arquivo_imagem = sys.argv[3] if len(sys.argv) == 4 else None
+
+    silhueta = [
+        (100, 150),
+        (200, 250),
+        (300, 100),
+        (400, 0)
+    ]
+
+    if arquivo_imagem is not None:
+        gerarSVG(silhueta, arquivo_imagem)
+
+    print(f"SVG salvo em '{arquivo_imagem}'.")
