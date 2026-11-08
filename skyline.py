@@ -16,12 +16,11 @@ class Silhueta:
     def __init__(self):
         self.pares = []
 
-    def add(self, a):
-        self.pares.append(a)
+    def add(self, par):
+        self.pares.append(par)
 
     def qtd(self):
         return len(self.pares)
-
 
 def cmpReta(a, b):
     if a[0] == b[0] and a[1] == b[1]:
@@ -37,17 +36,17 @@ def cmpReta(a, b):
 
 
 # skyline(edificios): recebe uma lista de triplas e devolve a lista de pares da silhueta, usando Divisão e Conquista.
-def skyline(edificios):
+def skyline(edificios: list[Edificio]) -> Silhueta:
     if len(edificios) == 0:
-        return None
+        return Silhueta()
 
     if len(edificios) == 1:
         return silhuetaEdificio(edificios[0])
 
-    mid = len(edificios // 2)
+    mid = len(edificios) // 2
 
     esq = edificios[:mid]
-    dir = edificios[mid + 1 :]
+    dir = edificios[mid:]
 
     le = skyline(esq)
     ld = skyline(dir)
@@ -55,8 +54,8 @@ def skyline(edificios):
     return unirSilhuetas(le, ld)
 
 
-# unirSilhuetas(s1, s2): recebe duas silhuetas e devolve sua união.
-def unirSilhuetas(s1, s2):
+# recebe duas silhuetas e devolve sua união
+def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
     i = j = 0
     s3 = Silhueta()
 
@@ -94,19 +93,17 @@ def unirSilhuetas(s1, s2):
     return s3
 
 
-# silhuetaEdificio(edificio): devolve a silhueta de um único edifício.
-
-
-def silhuetaEdificio(ed):
+# devolve a silhueta de um único edifício
+def silhuetaEdificio(ed: Edificio) -> Silhueta:
     s = Silhueta()
 
-    s.pares.append((ed.e, ed.h))
-    s.pares.append((ed.d, 0))
+    s.add((ed.e, ed.h))
+    s.add((ed.d, 0))
 
     return s
 
 
-def gerarSVG(silhueta, arquivo_imagem):
+def gerarSVG(silhueta: list, arquivo_imagem: str):
     # dimensão total da tela (canvas SVG)
     largura_canvas = 800
     altura_canvas = 450
@@ -144,12 +141,10 @@ def gerarSVG(silhueta, arquivo_imagem):
             pontos.append((x, y))
 
         pontos_svg = " ".join(f"{x},{y}" for x, y in pontos)
-        conteudo_svg.extend(
-            [
+        conteudo_svg.extend([
                 f'<polygon points="{pontos_svg}" fill="peachpuff" stroke="none" />',
                 f'<polyline points="{pontos_svg}" fill="none" stroke="black" stroke-width="3" />',
-            ]
-        )
+        ])
 
     conteudo_svg.extend(
         [
@@ -161,8 +156,25 @@ def gerarSVG(silhueta, arquivo_imagem):
     with open(arquivo_imagem, "w", encoding="utf-8") as f:
         f.write("\n".join(conteudo_svg))
 
-    return f
+def ler_entrada(nome_arquivo: str) -> tuple[list[Edificio], int]:
+    edificios = []
 
+    with open(nome_arquivo, 'r', encoding='utf-8') as f:
+        n = int(f.readline())
+        
+        for linha in f:
+            e, d, h = map(int, linha.split()) # map converte cada número de texto para inteiro
+            ed = Edificio(e, h, d)
+            edificios.append(ed)
+
+    return edificios, n
+
+def escrever_saida(silhueta: Silhueta, nome_arquivo: str) -> None:
+    with open(nome_arquivo, 'w', encoding='utf-8') as f:
+        f.write(str(silhueta.qtd()) + '\n')
+
+        for x, h in silhueta.pares:
+            f.write(f'{x} {h}\n')
 
 if __name__ == "__main__":
     """
@@ -174,10 +186,12 @@ if __name__ == "__main__":
     arquivo_saida = sys.argv[2]
     arquivo_imagem = sys.argv[3] if len(sys.argv) == 4 else None
 
-    silhueta = [(100, 150), (200, 250), (300, 100), (400, 0)]
+    edificios, n = ler_entrada(arquivo_entrada)
+
+    silhueta = skyline(edificios)
+
+    escrever_saida(silhueta, arquivo_saida)
 
     if arquivo_imagem is not None:
-        gerarSVG(silhueta, arquivo_imagem)
-
-    print(f"SVG salvo em '{arquivo_imagem}'.")
-
+        gerarSVG(silhueta.pares, arquivo_imagem)
+        print(f"SVG salvo em '{arquivo_imagem}'.")
