@@ -74,7 +74,9 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
 
     s3.add(atual)
 
-    while 1:
+    while (True):
+
+
         while i < s1.qtd() and (s1.pares[i][0] < atual[0] or s1.pares[i][1] < atual[1]):
             i += 1
 
@@ -89,6 +91,8 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
             atual = s2.pares[j][0]
             j += 1
             s3.add(atual)
+        else:
+            break
 
     return s3
 
