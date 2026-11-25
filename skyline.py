@@ -182,6 +182,10 @@ if __name__ == "__main__":
     python skyline.py entrada.txt saida.txt imagem.svg
     """
 
+    if (len(sys.argv) < 3): 
+            print("O comando deve ser no formato 'python skyline.py <entrada.txt> <saida.txt>'")
+            exit(0)
+        
     arquivo_entrada = sys.argv[1]
     arquivo_saida = sys.argv[2]
     arquivo_imagem = sys.argv[3] if len(sys.argv) == 4 else None
