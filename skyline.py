@@ -22,14 +22,18 @@ class Silhueta:
     def qtd(self):
         return len(self.pares)
 
+
 def cmpReta(a, b):
-    if a[0] == b[0] and a[1] == b[1]:
-        return 0
+    if a[0] == b[0]:
+        if a[1] == b[1]:
+            return 0
+
+        if a[1] > b[1]:
+            return -1
+
+        return 1
 
     if a[0] < b[0]:
-        return -1
-
-    if a[1] > b[1]:
         return -1
 
     return 1
@@ -60,7 +64,7 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
     s3 = Silhueta()
 
     cmp = cmpReta(s1.pares[0], s2.pares[0])
-    
+
     if cmp == -1:
         atual = s1.pares[0]
         i += 1
@@ -74,9 +78,7 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
 
     s3.add(atual)
 
-    while (True):
-
-
+    while True:
         while i < s1.qtd() and (s1.pares[i][0] < atual[0] or s1.pares[i][1] < atual[1]):
             i += 1
 
@@ -86,7 +88,7 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
         if i >= s1.qtd() and j >= s2.qtd():
             break
 
-        if j >= s2.qtd() or  i < s1.qtd() and s1.pares[i][0] > s2.pares[j][0]:
+        if j >= s2.qtd() or i < s1.qtd() and s1.pares[i][0] > s2.pares[j][0]:
             atual = s1.pares[i]
             i += 1
             s3.add(atual)
@@ -94,7 +96,6 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
             atual = s2.pares[j]
             j += 1
             s3.add(atual)
-       
 
     return s3
 
@@ -147,10 +148,12 @@ def gerarSVG(silhueta: list, arquivo_imagem: str):
             pontos.append((x, y))
 
         pontos_svg = " ".join(f"{x},{y}" for x, y in pontos)
-        conteudo_svg.extend([
+        conteudo_svg.extend(
+            [
                 f'<polygon points="{pontos_svg}" fill="peachpuff" stroke="none" />',
                 f'<polyline points="{pontos_svg}" fill="none" stroke="black" stroke-width="3" />',
-        ])
+            ]
+        )
 
     conteudo_svg.extend(
         [
@@ -162,25 +165,30 @@ def gerarSVG(silhueta: list, arquivo_imagem: str):
     with open(arquivo_imagem, "w", encoding="utf-8") as f:
         f.write("\n".join(conteudo_svg))
 
+
 def ler_entrada(nome_arquivo: str) -> tuple[list[Edificio], int]:
     edificios = []
 
-    with open(nome_arquivo, 'r', encoding='utf-8') as f:
+    with open(nome_arquivo, "r", encoding="utf-8") as f:
         n = int(f.readline())
-        
+
         for linha in f:
-            e, h, d = map(int, linha.split()) # map converte cada número de texto para inteiro
+            e, h, d = map(
+                int, linha.split()
+            )  # map converte cada número de texto para inteiro
             ed = Edificio(e, h, d)
             edificios.append(ed)
 
     return edificios, n
 
+
 def escrever_saida(silhueta: Silhueta, nome_arquivo: str) -> None:
-    with open(nome_arquivo, 'w', encoding='utf-8') as f:
-        f.write(str(silhueta.qtd()) + '\n')
+    with open(nome_arquivo, "w", encoding="utf-8") as f:
+        f.write(str(silhueta.qtd()) + "\n")
 
         for x, h in silhueta.pares:
-            f.write(f'{x} {h}\n')
+            f.write(f"{x} {h}\n")
+
 
 if __name__ == "__main__":
     """
@@ -188,10 +196,12 @@ if __name__ == "__main__":
     python skyline.py entrada.txt saida.txt imagem.svg
     """
 
-    if (len(sys.argv) < 3): 
-        print("O comando deve ser no formato 'python skyline.py <entrada.txt> <saida.txt>'")
+    if len(sys.argv) < 3:
+        print(
+            "O comando deve ser no formato 'python skyline.py <entrada.txt> <saida.txt>'"
+        )
         exit(0)
-        
+
     arquivo_entrada = sys.argv[1]
     arquivo_saida = sys.argv[2]
     arquivo_imagem = sys.argv[3] if len(sys.argv) == 4 else None
@@ -205,3 +215,4 @@ if __name__ == "__main__":
     if arquivo_imagem is not None:
         gerarSVG(silhueta.pares, arquivo_imagem)
         print(f"SVG salvo em '{arquivo_imagem}'.")
+
