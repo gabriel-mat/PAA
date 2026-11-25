@@ -120,54 +120,81 @@ def silhuetaEdificio(ed: Edificio) -> Silhueta:
     return s
 
 def gerarSVG(silhueta: list, arquivo_imagem: str):
-    # dimensão total da tela (canvas SVG)
     largura_canvas = 800
     altura_canvas = 450
 
-    margem_borda = 50
-    margem_inferior = 50
+    margem_esquerda = 60
+    margem_direita = 40
+    margem_superior = 40
+    margem_inferior = 65
 
-    # posição Y da linha de base (chão)
     y_base = altura_canvas - margem_inferior
-
-    # linha de base centralizada
-    x1_base = margem_borda
-    x2_base = largura_canvas - margem_borda
+    x_origem = margem_esquerda
 
     conteudo_svg = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{largura_canvas}" height="{altura_canvas}">',
-        f'<rect width="100%" height="100%" fill="white" />',
+        '<rect width="100%" height="100%" fill="white" />',
+        '<defs><marker id="seta" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="black"/></marker></defs>',
     ]
 
-    # constrói os pontos do polígono
     if len(silhueta) > 0:
-        pontos = []
-        pontos.insert(0, (silhueta[0][0], y_base))
+        x_max = silhueta[-1][0]
+        h_max = max(h for x, h in silhueta)
 
-        for i, ponto in enumerate(silhueta):
-            x = ponto[0]
-            h = ponto[1]
-            y = y_base - h
+        # mesma escala para os dois eixos
+        escala = min(
+            (largura_canvas - margem_esquerda - margem_direita - 15) / x_max,
+            (altura_canvas - margem_superior - margem_inferior) / h_max
+        )
+
+        # constrói os pontos do polígono
+        pontos = [(x_origem + silhueta[0][0] * escala, y_base)]
+
+        for i, (x, h) in enumerate(silhueta):
+            x_svg = x_origem + x * escala
+            y_svg = y_base - h * escala
 
             if i > 0:
-                h_anterior = silhueta[i - 1][1]  # altura do ponto anterior
-                # adiciona a quina horizontal
-                pontos.append((x, y_base - h_anterior))
+                h_anterior = silhueta[i - 1][1]
+                pontos.append((x_svg, y_base - h_anterior * escala))
 
-            pontos.append((x, y))
+            pontos.append((x_svg, y_svg))
 
         pontos_svg = " ".join(f"{x},{y}" for x, y in pontos)
+
         conteudo_svg.extend([
-                f'<polygon points="{pontos_svg}" fill="peachpuff" stroke="none" />',
-                f'<polyline points="{pontos_svg}" fill="none" stroke="black" stroke-width="3" />',
+            f'<polygon points="{pontos_svg}" fill="peachpuff" stroke="none" />',
+            f'<polyline points="{pontos_svg}" fill="none" stroke="black" stroke-width="2" />',
         ])
 
-    conteudo_svg.extend(
-        [
-            f'<line x1="{x1_base}" y1="{y_base}" x2="{x2_base}" y2="{y_base}" stroke="black" stroke-width="1" />',
-            "</svg>",
-        ]
-    )
+        # marcações e números do eixo X
+        for x, h in silhueta:
+            x_svg = x_origem + x * escala
+
+            conteudo_svg.extend([
+                f'<line x1="{x_svg}" y1="{y_base}" x2="{x_svg}" y2="{y_base + 5}" stroke="black" />',
+                f'<text x="{x_svg}" y="{y_base + 22}" font-size="13" text-anchor="middle">{x}</text>',
+            ])
+
+        # marcações e números do eixo h
+        alturas = sorted(set([0] + [h for x, h in silhueta]))
+
+        for h in alturas:
+            y_svg = y_base - h * escala
+
+            conteudo_svg.extend([
+                f'<line x1="{x_origem - 5}" y1="{y_svg}" x2="{x_origem}" y2="{y_svg}" stroke="black" />',
+                f'<text x="{x_origem - 10}" y="{y_svg + 4}" font-size="13" text-anchor="end">{h}</text>',
+            ])
+
+    # desenha os eixos
+    conteudo_svg.extend([
+        f'<line x1="{x_origem}" y1="{y_base}" x2="{largura_canvas - margem_direita}" y2="{y_base}" stroke="black" stroke-width="1" marker-end="url(#seta)" />',
+        f'<line x1="{x_origem}" y1="{y_base}" x2="{x_origem}" y2="{margem_superior}" stroke="black" stroke-width="1" marker-end="url(#seta)" />',
+        f'<text x="{largura_canvas - margem_direita + 8}" y="{y_base + 5}" font-size="16" font-style="italic">x</text>',
+        f'<text x="{x_origem - 5}" y="{margem_superior - 12}" font-size="16" font-style="italic">h</text>',
+        '</svg>',
+    ])
 
     with open(arquivo_imagem, "w", encoding="utf-8") as f:
         f.write("\n".join(conteudo_svg))
@@ -209,10 +236,17 @@ if __name__ == "__main__":
     arquivo_saida = sys.argv[2]
     arquivo_imagem = sys.argv[3] if len(sys.argv) == 4 else None
 
-    edificios, n = ler_entrada(arquivo_entrada)
+    #edificios, n = ler_entrada(arquivo_entrada)
 
-    silhueta = skyline(edificios)
+    #silhueta = skyline(edificios)
 
+    #saída hard coded para testar
+    silhueta = Silhueta()
+
+    silhueta.add((2, 5))
+    silhueta.add((4, 8))
+    silhueta.add((10, 0))
+    
     escrever_saida(silhueta, arquivo_saida)
 
     if arquivo_imagem is not None:
