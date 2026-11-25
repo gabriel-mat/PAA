@@ -60,6 +60,7 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
     s3 = Silhueta()
 
     cmp = cmpReta(s1.pares[0], s2.pares[0])
+    atual = (0, 0)
 
     if cmp == -1:
         atual = s1.pares[0]
@@ -83,16 +84,18 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
         while j < s2.qtd() and (s2.pares[j][0] < atual[0] or s2.pares[j][1] < atual[1]):
             j += 1
 
-        if j >= s2.qtd() or s1.pares[i][0] > s2.pares[j][0]:
+        if i >= s1.qtd() and j >= s2.qtd():
+            break
+
+        if j >= s2.qtd() or  i < s1.qtd() and s1.pares[i][0] > s2.pares[j][0]:
             atual = s1.pares[i][0]
             i += 1
             s3.add(atual)
-        elif j < s2.qtd():
+        else:
             atual = s2.pares[j][0]
             j += 1
             s3.add(atual)
-        else:
-            break
+       
 
     return s3
 
@@ -167,7 +170,7 @@ def ler_entrada(nome_arquivo: str) -> tuple[list[Edificio], int]:
         n = int(f.readline())
         
         for linha in f:
-            e, d, h = map(int, linha.split()) # map converte cada número de texto para inteiro
+            e, h, d = map(int, linha.split()) # map converte cada número de texto para inteiro
             ed = Edificio(e, h, d)
             edificios.append(ed)
 
