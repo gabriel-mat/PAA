@@ -71,7 +71,7 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
     s3 = Silhueta()
 
     cmp = cmpReta(s1.pares[0], s2.pares[0])
-
+    
     if cmp == -1:
         atual = s1.pares[0]
         i += 1
@@ -85,21 +85,27 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
 
     s3.add(atual)
 
-    while 1:
+    while (True):
+
+
         while i < s1.qtd() and (s1.pares[i][0] < atual[0] or s1.pares[i][1] < atual[1]):
             i += 1
 
         while j < s2.qtd() and (s2.pares[j][0] < atual[0] or s2.pares[j][1] < atual[1]):
             j += 1
 
-        if j >= s2.qtd() or s1.pares[i][0] > s2.pares[j][0]:
-            atual = s1.pares[i][0]
+        if i >= s1.qtd() and j >= s2.qtd():
+            break
+
+        if j >= s2.qtd() or  i < s1.qtd() and s1.pares[i][0] > s2.pares[j][0]:
+            atual = s1.pares[i]
             i += 1
             s3.add(atual)
-        elif j < s2.qtd():
-            atual = s2.pares[j][0]
+        else:
+            atual = s2.pares[j]
             j += 1
             s3.add(atual)
+       
 
     return s3
 
