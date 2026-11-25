@@ -11,6 +11,7 @@ class Edificio:
     def __init__(self, e, h, d):
         self.e, self.h, self.d = e, h, d
 
+
 class Silhueta:
     def __init__(self):
         self.pares = []
@@ -21,24 +22,34 @@ class Silhueta:
     def qtd(self):
         return len(self.pares)
 
-def cmpReta(a, b):
-    if a[0] == b[0] and a[1] == b[1]:
-        return 0
 
-    if a[0] < b[0]:
+def cmpReta(s1, s2, i, j):
+    if i >= s1.qtd():
+        return 1
+
+    if j >= s2.qtd():
         return -1
 
-    if a[1] > b[1]:
+    if s1.pares[i][0] == s2.pares[j][0]:
+        if s1.pares[i][1] == s2.pares[j][1]:
+            return 0
+
+        if s1.pares[i][1] > s2.pares[j][1]:
+            return -1
+
+        return 1
+
+    if s1.pares[i][0] < s2.pares[j][0]:
         return -1
 
     return 1
 
 
 def skyline(edificios: list[Edificio]) -> Silhueta:
-    # Recebe uma lista de Edifícios (com a tripla e,h,d) 
+    # Recebe uma lista de Edifícios (com a tripla e,h,d)
     # e devolve a lista de pares da silhueta, usando Divisão e Conquista
-    
-    # Casos bases: 
+
+    # Casos bases:
     #   nenhum edifício -> retorna um objeto Silhueta vazio
     #   um edifício -> chama a função que adiciona os 2 pares (e, h),(d, 0) à Silhueta
 
@@ -48,12 +59,12 @@ def skyline(edificios: list[Edificio]) -> Silhueta:
     if len(edificios) == 1:
         return silhuetaEdificio(edificios[0])
 
-    # Divisão: particiona os edifícios em dois subconjuntos 
-    mid = len(edificios) // 2 # divisão inteira por 2 
+    # Divisão: particiona os edifícios em dois subconjuntos
+    mid = len(edificios) // 2  # divisão inteira por 2
 
-    # divide a lista em duas partes 
-    esq = edificios[:mid] # do início até mid-1
-    dir = edificios[mid:] # de mid até o final
+    # divide a lista em duas partes
+    esq = edificios[:mid]  # do início até mid-1
+    dir = edificios[mid:]  # de mid até o final
 
     # Conquista: determina recursivamente o skyline de cada subconjunto
     le = skyline(esq)
@@ -69,48 +80,37 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
 
     i = j = 0
     s3 = Silhueta()
+    atual = (-1, -1)
 
-    cmp = cmpReta(s1.pares[0], s2.pares[0])
-    
-    if cmp == -1:
-        atual = s1.pares[0]
-        i += 1
-    elif cmp == 1:
-        atual = s2.pares[0]
-        j += 1
-    else:
-        atual = s1.pares[0]
-        i += 1
-        j += 1
-
-    s3.add(atual)
-
-    while (True):
-
-
-        while i < s1.qtd() and (s1.pares[i][0] < atual[0] or s1.pares[i][1] < atual[1]):
+    while True:
+        while i < s1.qtd() and s1.pares[i][0] < atual[0]:
             i += 1
 
-        while j < s2.qtd() and (s2.pares[j][0] < atual[0] or s2.pares[j][1] < atual[1]):
+        while j < s2.qtd() and s2.pares[j][0] < atual[0]:
             j += 1
 
         if i >= s1.qtd() and j >= s2.qtd():
             break
 
-        if j >= s2.qtd() or  i < s1.qtd() and s1.pares[i][0] > s2.pares[j][0]:
+        cmp = cmpReta(s1, s2, i, j)
+
+        if cmp == -1:
             atual = s1.pares[i]
             i += 1
-            s3.add(atual)
-        else:
+        elif cmp == 1:
             atual = s2.pares[j]
             j += 1
-            s3.add(atual)
-       
+        else:
+            atual = s1.pares[i]
+            i += 1
+            j += 1
+
+        s3.add(atual)
 
     return s3
 
 
-def silhuetaEdificio(ed: Edificio) -> Silhueta: 
+def silhuetaEdificio(ed: Edificio) -> Silhueta:
     # Devolve a silhueta de um único edifício -> [(e, h),(d, 0)]
 
     s = Silhueta()
@@ -118,6 +118,7 @@ def silhuetaEdificio(ed: Edificio) -> Silhueta:
     s.add((ed.d, 0))
 
     return s
+
 
 def gerarSVG(silhueta: list, arquivo_imagem: str):
     largura_canvas = 800
@@ -199,28 +200,33 @@ def gerarSVG(silhueta: list, arquivo_imagem: str):
     with open(arquivo_imagem, "w", encoding="utf-8") as f:
         f.write("\n".join(conteudo_svg))
 
+
 def ler_entrada(nome_arquivo: str) -> tuple[list[Edificio], int]:
     # 1ª linha: número n ≥ 0 de edifícios
     # cada uma das n linhas seguintes contém 3 inteiros separados por espaços, na ordem e h d
 
     edificios = []
 
-    with open(nome_arquivo, 'r', encoding='utf-8') as f:
+    with open(nome_arquivo, "r", encoding="utf-8") as f:
         n = int(f.readline())
-        
+
         for linha in f:
-            e, h, d = map(int, linha.split()) # map converte cada número de texto para inteiro
+            e, h, d = map(
+                int, linha.split()
+            )  # map converte cada número de texto para inteiro
             ed = Edificio(e, h, d)
             edificios.append(ed)
 
     return edificios, n
 
+
 def escrever_saida(silhueta: Silhueta, nome_arquivo: str) -> None:
-    with open(nome_arquivo, 'w', encoding='utf-8') as f:
-        f.write(str(silhueta.qtd()) + '\n')
+    with open(nome_arquivo, "w", encoding="utf-8") as f:
+        f.write(str(silhueta.qtd()) + "\n")
 
         for x, h in silhueta.pares:
-            f.write(f'{x} {h}\n')
+            f.write(f"{x} {h}\n")
+
 
 if __name__ == "__main__":
     """
@@ -228,10 +234,12 @@ if __name__ == "__main__":
     python skyline.py entrada.txt saida.txt imagem.svg
     """
 
-    if (len(sys.argv) < 3): 
-        print("O comando deve ser no formato 'python skyline.py <entrada.txt> <saida.txt>'")
+    if len(sys.argv) < 3:
+        print(
+            "O comando deve ser no formato 'python skyline.py <entrada.txt> <saida.txt>'"
+        )
         exit(0)
-        
+
     arquivo_entrada = sys.argv[1]
     arquivo_saida = sys.argv[2]
     arquivo_imagem = sys.argv[3] if len(sys.argv) == 4 else None
