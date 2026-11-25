@@ -23,17 +23,23 @@ class Silhueta:
         return len(self.pares)
 
 
-def cmpReta(a, b):
-    if a[0] == b[0]:
-        if a[1] == b[1]:
+def cmpReta(s1, s2, i, j):
+    if i >= s1.qtd():
+        return 1
+
+    if j >= s2.qtd():
+        return -1
+
+    if s1.pares[i][0] == s2.pares[j][0]:
+        if s1.pares[i][1] == s2.pares[j][1]:
             return 0
 
-        if a[1] > b[1]:
+        if s1.pares[i][1] > s2.pares[j][1]:
             return -1
 
         return 1
 
-    if a[0] < b[0]:
+    if s1.pares[i][0] < s2.pares[j][0]:
         return -1
 
     return 1
@@ -74,21 +80,7 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
 
     i = j = 0
     s3 = Silhueta()
-
-    cmp = cmpReta(s1.pares[0], s2.pares[0])
-
-    if cmp == -1:
-        atual = s1.pares[0]
-        i += 1
-    elif cmp == 1:
-        atual = s2.pares[0]
-        j += 1
-    else:
-        atual = s1.pares[0]
-        i += 1
-        j += 1
-
-    s3.add(atual)
+    atual = (-1, -1)
 
     while True:
         while i < s1.qtd() and (s1.pares[i][0] < atual[0] or s1.pares[i][1] < atual[1]):
@@ -100,14 +92,20 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
         if i >= s1.qtd() and j >= s2.qtd():
             break
 
-        if j >= s2.qtd() or i < s1.qtd() and s1.pares[i][0] > s2.pares[j][0]:
-            atual = s1.pares[i]
+        cmp = cmpReta(s1, s2, i, j)
+
+        if cmp == -1:
+            atual = s1.pares[0]
             i += 1
-            s3.add(atual)
-        else:
-            atual = s2.pares[j]
+        elif cmp == 1:
+            atual = s2.pares[0]
             j += 1
-            s3.add(atual)
+        else:
+            atual = s1.pares[0]
+            i += 1
+            j += 1
+
+        s3.add(atual)
 
     return s3
 
