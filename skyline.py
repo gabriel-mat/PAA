@@ -80,32 +80,34 @@ def unirSilhuetas(s1: Silhueta, s2: Silhueta) -> Silhueta:
 
     i = j = 0
     s3 = Silhueta()
-    atual = (-1, -1)
+    hs1 = hs2 = 0
+    ultimo = [-1, -1]
+    atual = [-1, -1]
 
     while True:
-        while i < s1.qtd() and s1.pares[i][0] < atual[0]:
-            i += 1
-
-        while j < s2.qtd() and s2.pares[j][0] < atual[0]:
-            j += 1
-
         if i >= s1.qtd() and j >= s2.qtd():
             break
 
-        cmp = cmpReta(s1, s2, i, j)
-
-        if cmp == -1:
-            atual = s1.pares[i]
+        if(j >= s2.qtd() or (i < s1.qtd() and s1.pares[i][0] < s2.pares[j][0])):
+            atual[0] = s1.pares[i][0]
+            hs1 = s1.pares[i][1]
             i += 1
-        elif cmp == 1:
-            atual = s2.pares[j]
+        elif(i >= s1.qtd() or s1.pares[i][0] > s2.pares[j][0]):
+            atual[0] = s2.pares[    ][0]
+            hs2 = s2.pares[j][1]
             j += 1
         else:
-            atual = s1.pares[i]
+            atual[0] = s1.pares[i][0]
+            hs1 = s1.pares[i][1]
+            hs2 = s2.pares[j][1]
             i += 1
             j += 1
 
-        s3.add(atual)
+        atual[1] = max(hs1, hs2)
+
+        
+        s3.add(atual.copy())
+        ultimo = atual.copy
 
     return s3
 
@@ -244,16 +246,16 @@ if __name__ == "__main__":
     arquivo_saida = sys.argv[2]
     arquivo_imagem = sys.argv[3] if len(sys.argv) == 4 else None
 
-    #edificios, n = ler_entrada(arquivo_entrada)
+    edificios, n = ler_entrada(arquivo_entrada)
 
-    #silhueta = skyline(edificios)
+    silhueta = skyline(edificios)
 
     #saída hard coded para testar
-    silhueta = Silhueta()
+    #silhueta = Silhueta()
 
-    silhueta.add((2, 5))
-    silhueta.add((4, 8))
-    silhueta.add((10, 0))
+    #silhueta.add((2, 5))
+    #silhueta.add((4, 8))
+    #silhueta.add((10, 0))
     
     escrever_saida(silhueta, arquivo_saida)
 
